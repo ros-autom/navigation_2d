@@ -19,7 +19,7 @@ MultiMapper::MultiMapper()
 	robotNode.param("offset_frame", mOffsetFrame, std::string("odometry_offset"));
 	robotNode.param("map_frame", mMapFrame, std::string("map"));
 	robotNode.param("map_service", mMapService, std::string("get_map"));
-	robotNode.param("laser_topic", mLaserTopic, std::string("scan"));
+	robotNode.param("laser_topic", mLaserTopic, std::string("/robot_1/scan"));
 	robotNode.param("map_topic", mMapTopic, std::string("map"));
 	
 	ros::NodeHandle mapperNode("~/");
@@ -160,17 +160,47 @@ MultiMapper::MultiMapper()
 		locResult.header.stamp = ros::Time::now();
 		locResult.header.frame_id = mMapFrame.c_str();
 		locResult.pose.position.x = 0;
+		locResult.pose.position.y = -1;
+		locResult.pose.position.z = 0;
+		locResult.pose.orientation = tf::createQuaternionMsgFromYaw(0);
+		mPosePublisher.publish(locResult);
+	}/*
+	else if(mRobotID==2)
+	{
+		mState=ST_MAPPING;
+		ROS_INFO("Initialized robot2,starting to map now.");
+		mSelfLocalizer = NULL;
+		geometry_msgs::PoseStamped locResult2;
+		locResult2.header.stamp = ros::Time::now();
+		locResult2.header.frame_id = mMapFrame.c_str();
+		locResult2.pose.position.x = 0;
+		locResult2.pose.position.y = -2;
+		locResult2.pose.position.z = 0;
+		locResult2.pose.orientation = tf::createQuaternionMsgFromYaw(0);
+		mPosePublisher.publish(locResult2);
+	}	
+	else if(mRobotID==2)
+	{
+		mState=ST_MAPPING;
+		ROS_INFO("Initialized robot2,starting to map now.");
+		mSelfLocalizer = NULL;
+		geometry_msgs::PoseStamped locResult;
+		locResult.header.stamp = ros::Time::now();
+		locResult.header.frame_id = mMapFrame.c_str();
+		locResult.pose.position.x = 40;
 		locResult.pose.position.y = 0;
 		locResult.pose.position.z = 0;
 		locResult.pose.orientation = tf::createQuaternionMsgFromYaw(0);
 		mPosePublisher.publish(locResult);
-	}else
+	}
+	*/
+	else 
 	{
-		// I am not number one, so wait to receive a map from number one.
 		mState = ST_WAITING_FOR_MAP;
-		ROS_INFO("Initialized robot %d, waiting for map from robot 1 now.", mRobotID);
+		ROS_INFO("Initialized robot %d, waiting for map from robot 3 now.", mRobotID);
 		mSelfLocalizer = new SelfLocalizer();
 	}
+	
 }
 
 MultiMapper::~MultiMapper()
