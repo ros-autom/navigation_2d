@@ -208,13 +208,13 @@ void MultiMapper::setScanSolver(karto::ScanSolver* scanSolver)
 void MultiMapper::setRobotPose(double x, double y, double yaw)
 {
 	tf::Transform transform;
-	std::cout<<"Dilwsi Transform: success"<<std::endl;
+	std::cout<<"Declare Transform: success"<<std::endl;
 	transform.setOrigin(tf::Vector3(x, y, 0));
-	std::cout<<"setOrigin: success"<<std::endl;
+	std::cout<<"SetOrigin: success"<<std::endl;
 	transform.setRotation(tf::createQuaternionFromYaw(yaw));
-	std::cout<<"setRotation: success"<<std::endl;
+	std::cout<<"SetRotation: success"<<std::endl;
 	transform = transform.inverse();
-	std::cout<<"inverse: success"<<std::endl;
+	std::cout<<"Inverse: success"<<std::endl;
 	
 	tf::Stamped<tf::Pose> pose_in, pose_out;
 	std::cout<<"pose_in / out: success"<<std::endl;
