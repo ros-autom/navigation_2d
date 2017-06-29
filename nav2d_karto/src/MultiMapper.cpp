@@ -19,7 +19,7 @@ MultiMapper::MultiMapper()
 	robotNode.param("offset_frame", mOffsetFrame, std::string("odometry_offset"));
 	robotNode.param("map_frame", mMapFrame, std::string("map"));
 	robotNode.param("map_service", mMapService, std::string("get_map"));
-	robotNode.param("laser_topic", mLaserTopic, std::string("/robot_1/scan"));
+	robotNode.param("laser_topic", mLaserTopic, std::string("scan"));
 	robotNode.param("map_topic", mMapTopic, std::string("map"));
 	
 	ros::NodeHandle mapperNode("~/");
@@ -151,56 +151,48 @@ MultiMapper::MultiMapper()
 	
 	if(mRobotID == 1)
 	{
-		// I am the number one, so start mapping right away.
+
 		mState = ST_MAPPING;
-		ROS_INFO("Inititialized robot 1, starting to map now.");
+		ROS_INFO("Initialized robot 1, starting to map now.");
 		mSelfLocalizer = NULL;
 		
-		geometry_msgs::PoseStamped locResult;
-		locResult.header.stamp = ros::Time::now();
-		locResult.header.frame_id = mMapFrame.c_str();
-		locResult.pose.position.x = 0;
-		locResult.pose.position.y = -1;
-		locResult.pose.position.z = 0;
-		locResult.pose.orientation = tf::createQuaternionMsgFromYaw(0);
-		mPosePublisher.publish(locResult);
-	}/*
-	else if(mRobotID==2)
-	{
-		mState=ST_MAPPING;
-		ROS_INFO("Initialized robot2,starting to map now.");
-		mSelfLocalizer = NULL;
-		geometry_msgs::PoseStamped locResult2;
-		locResult2.header.stamp = ros::Time::now();
-		locResult2.header.frame_id = mMapFrame.c_str();
-		locResult2.pose.position.x = 0;
-		locResult2.pose.position.y = -2;
-		locResult2.pose.position.z = 0;
-		locResult2.pose.orientation = tf::createQuaternionMsgFromYaw(0);
-		mPosePublisher.publish(locResult2);
-	}	
-	else if(mRobotID==2)
-	{
-		mState=ST_MAPPING;
-		ROS_INFO("Initialized robot2,starting to map now.");
-		mSelfLocalizer = NULL;
-		geometry_msgs::PoseStamped locResult;
-		locResult.header.stamp = ros::Time::now();
-		locResult.header.frame_id = mMapFrame.c_str();
-		locResult.pose.position.x = 40;
-		locResult.pose.position.y = 0;
-		locResult.pose.position.z = 0;
-		locResult.pose.orientation = tf::createQuaternionMsgFromYaw(0);
-		mPosePublisher.publish(locResult);
+		geometry_msgs::PoseStamped locResult1;
+		locResult1.header.stamp = ros::Time::now();
+		locResult1.header.frame_id = mMapFrame.c_str();
+		locResult1.pose.position.x = 0.0;
+		locResult1.pose.position.y = -0.0;
+		locResult1.pose.position.z = 0.0;
+		locResult1.pose.orientation = tf::createQuaternionMsgFromYaw(0);
+		mPosePublisher.publish(locResult1);
 	}
-	*/
-	else 
+		
+	else if(mRobotID == 2)
 	{
-		mState = ST_WAITING_FOR_MAP;
-		ROS_INFO("Initialized robot %d, waiting for map from robot 3 now.", mRobotID);
-		mSelfLocalizer = new SelfLocalizer();
+	
+		static double x = -14.0;
+		static double y = 12.0;
+		static double orien =0.0;
+
+		setRobotPose(x,y,orien);
+
+
+		ROS_INFO("Received initial pose (%.2f, %.2f, %.2f) on robot %d, now starting to map.",x,y,orien,mRobotID);
+	
+		mState = ST_MAPPING;
+		ROS_INFO("Inititialized robot 2, starting to map now.");
+		mSelfLocalizer = NULL;
 	}
 	
+	else
+	{
+		// I am not number one, so wait to receive a map from number one.
+		mState = ST_WAITING_FOR_MAP;
+		ROS_INFO("Initialized robot %d, waiting for map from robot 2 now.", mRobotID);
+		mSelfLocalizer = new SelfLocalizer();
+	}
+
+		
+
 }
 
 MultiMapper::~MultiMapper()
@@ -216,26 +208,37 @@ void MultiMapper::setScanSolver(karto::ScanSolver* scanSolver)
 void MultiMapper::setRobotPose(double x, double y, double yaw)
 {
 	tf::Transform transform;
+	std::cout<<"Dilwsi Transform: success"<<std::endl;
 	transform.setOrigin(tf::Vector3(x, y, 0));
+	std::cout<<"setOrigin: success"<<std::endl;
 	transform.setRotation(tf::createQuaternionFromYaw(yaw));
+	std::cout<<"setRotation: success"<<std::endl;
 	transform = transform.inverse();
+	std::cout<<"inverse: success"<<std::endl;
 	
 	tf::Stamped<tf::Pose> pose_in, pose_out;
+	std::cout<<"pose_in / out: success"<<std::endl;
 	pose_in.setData(transform);
+	std::cout<<"SetData: success"<<std::endl;
 	pose_in.frame_id_ = mRobotFrame;
+	std::cout<<"RobotFrame: success"<<std::endl;
 	pose_in.stamp_ = ros::Time(0);
-	mTransformListener.transformPose(mOdometryFrame, pose_in, pose_out);
+	std::cout<<"Time: success"<<std::endl;
+	
+	mTransformListener.transformPose(pose_in.frame_id_, pose_in, pose_out);
+	
+	std::cout<<"Transform Pose: success"<<std::endl;
 	
 	transform = pose_out;
+	std::cout<<"pose out: success"<<std::endl;
 	mOdometryOffset = transform.inverse();
+	std::cout<<"Transform inverse: success"<<std::endl;
 
-	if(mSelfLocalizer)
-	{
-		delete mSelfLocalizer;
-		mSelfLocalizer = NULL;
-	}
+	mSelfLocalizer = NULL;
+	
 	
 	// Publish the new pose (to inform other nodes, that we are localized now)
+
 	geometry_msgs::PoseStamped locResult;
 	locResult.header.stamp = ros::Time::now();
 	locResult.header.frame_id = mMapFrame.c_str();
@@ -327,7 +330,10 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			// Localization finished, kill the localizer and start mapping
 			ROS_INFO("Localization finished on robot %d, now starting to map.", mRobotID);
 			tf::Transform p = mSelfLocalizer->getBestPose();
+			
 			setRobotPose(p.getOrigin().getX(), p.getOrigin().getY(), tf::getYaw(p.getRotation()));
+			std::cout<<p.getOrigin().getX()<<" "<< p.getOrigin().getY()<<" "<< tf::getYaw(p.getRotation())<<std::endl;
+
 		}
 	}else 
 	if(mState == ST_MAPPING)
@@ -351,7 +357,6 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			}
 		}
 		karto::Pose2 kartoPose = karto::Pose2(tfPose.getOrigin().x(), tfPose.getOrigin().y(), tf::getYaw(tfPose.getRotation()));
-		
 		// create localized laser scan
 		karto::LocalizedLaserScanPtr laserScan = createFromRosMessage(*scan, mLaser->GetIdentifier());
 		laserScan->SetOdometricPose(kartoPose);
@@ -721,3 +726,4 @@ void MultiMapper::publishTransform()
 		mTransformBroadcaster.sendTransform(tf::StampedTransform (mMapToOdometry, ros::Time::now() , mMapFrame, mOffsetFrame));
 	}
 }
+
