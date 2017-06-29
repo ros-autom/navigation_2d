@@ -22,12 +22,12 @@ floorplan
 pioneer3at
 (
   name "robot1"
-  pose [0 -1 0 45]
+  pose [0 -1 0 0]
 )
 
 # Put two robots into the world
 pioneer3at
 (
   name "robot2"
-  pose [0 -2 0 0]
+  pose [-14 11 0 0]
 )
