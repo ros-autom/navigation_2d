@@ -168,11 +168,15 @@ MultiMapper::MultiMapper()
 		
 	else if(mRobotID == 2)
 	{
-	
+		//for stage simulator
+		/*
 		static double x = -14.0;
 		static double y = 12.0;
 		static double orien =0.0;
-
+		*/
+		static double x = 1.0;
+		static double y = 3.0;
+		static double orien =0.0;
 		setRobotPose(x,y,orien);
 
 
