@@ -1,4 +1,4 @@
-image: /home/balkan/ros/husky_kinetic/src/navigation_2d/nav2d_tutorials/world/warehouse.pgm
+image: ~/ros/husky_kinetic/src/navigation_2d/nav2d_tutorials/world/warehouse.pgm
 resolution: 0.040000
 origin: [-17.000000, -15.000000, 0.000000]
 negate: 0
