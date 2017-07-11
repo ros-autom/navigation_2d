@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(nav2d_operator)
-
+set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations ${CMAKE_CXX_FLAGS}")
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   roscpp
