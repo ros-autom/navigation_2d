@@ -21,7 +21,7 @@ MultiMapper::MultiMapper()
 	robotNode.param("map_service", mMapService, std::string("get_map"));
 	robotNode.param("laser_topic", mLaserTopic, std::string("scan"));
 	robotNode.param("map_topic", mMapTopic, std::string("map"));
-	
+
 	ros::NodeHandle mapperNode("~/");
 	mapperNode.param("grid_resolution", mMapResolution, 0.05);
 	mapperNode.param("range_threshold", mRangeThreshold, 30.0);
@@ -52,120 +52,120 @@ MultiMapper::MultiMapper()
 
 	// Initialize KARTO-Mapper
 	mMapper = new karto::OpenMapper(true);
-	
+
 	double param_d;
 	bool param_b;
 	int param_i;
-	
+
 	if(mapperNode.getParam("UseScanMatching", param_b))
 		mMapper->SetParameters("UseScanMatching", param_b);
-		
+
 	if(mapperNode.getParam("UseScanBarycenter", param_b))
 		mMapper->SetParameters("UseScanBarycenter", param_b);
-		
+
 	if(mapperNode.getParam("MinimumTravelDistance", param_d))
 		mMapper->SetParameters("MinimumTravelDistance", param_d);
-	
+
 	if(mapperNode.getParam("MinimumTravelHeading", param_d))
 		mMapper->SetParameters("MinimumTravelHeading", param_d);
-		
+
 	if(mapperNode.getParam("ScanBufferSize", param_i))
 		mMapper->SetParameters("ScanBufferSize", param_i);
-		
+
 	if(mapperNode.getParam("ScanBufferMaximumScanDistance", param_d))
 		mMapper->SetParameters("ScanBufferMaximumScanDistance", param_d);
-		
+
 	if(mapperNode.getParam("UseResponseExpansion", param_b))
 		mMapper->SetParameters("UseResponseExpansion", param_b);
-		
+
 	if(mapperNode.getParam("DistanceVariancePenalty", param_d))
 		mMapper->SetParameters("DistanceVariancePenalty", param_d);
-		
+
 	if(mapperNode.getParam("MinimumDistancePenalty", param_d))
 		mMapper->SetParameters("MinimumDistancePenalty", param_d);
-		
+
 	if(mapperNode.getParam("AngleVariancePenalty", param_d))
 		mMapper->SetParameters("AngleVariancePenalty", param_d);
-		
+
 	if(mapperNode.getParam("MinimumAnglePenalty", param_d))
 		mMapper->SetParameters("MinimumAnglePenalty", param_d);
-		
+
 	if(mapperNode.getParam("LinkMatchMinimumResponseFine", param_d))
 		mMapper->SetParameters("LinkMatchMinimumResponseFine", param_d);
-		
+
 	if(mapperNode.getParam("LinkScanMaximumDistance", param_d))
 		mMapper->SetParameters("LinkScanMaximumDistance", param_d);
-		
+
 	if(mapperNode.getParam("CorrelationSearchSpaceDimension", param_d))
 		mMapper->SetParameters("CorrelationSearchSpaceDimension", param_d);
-		
+
 	if(mapperNode.getParam("CorrelationSearchSpaceResolution", param_d))
 		mMapper->SetParameters("CorrelationSearchSpaceResolution", param_d);
-		
+
 	if(mapperNode.getParam("CorrelationSearchSpaceSmearDeviation", param_d))
 		mMapper->SetParameters("CorrelationSearchSpaceSmearDeviation", param_d);
-		
+
 	if(mapperNode.getParam("CoarseSearchAngleOffset", param_d))
 		mMapper->SetParameters("CoarseSearchAngleOffset", param_d);
-		
+
 	if(mapperNode.getParam("FineSearchAngleOffset", param_d))
 		mMapper->SetParameters("FineSearchAngleOffset", param_d);
-		
+
 	if(mapperNode.getParam("CoarseAngleResolution", param_d))
 		mMapper->SetParameters("CoarseAngleResolution", param_d);
-		
+
 	if(mapperNode.getParam("LoopSearchSpaceDimension", param_d))
 		mMapper->SetParameters("LoopSearchSpaceDimension", param_d);
-		
+
 	if(mapperNode.getParam("LoopSearchSpaceResolution", param_d))
 		mMapper->SetParameters("LoopSearchSpaceResolution", param_d);
-		
+
 	if(mapperNode.getParam("LoopSearchSpaceSmearDeviation", param_d))
 		mMapper->SetParameters("LoopSearchSpaceSmearDeviation", param_d);
-		
+
 	if(mapperNode.getParam("LoopSearchMaximumDistance", param_d))
 		mMapper->SetParameters("LoopSearchMaximumDistance", param_d);
-		
+
 	if(mapperNode.getParam("LoopMatchMinimumChainSize", param_i))
 		mMapper->SetParameters("LoopMatchMinimumChainSize", param_i);
-		
+
 	if(mapperNode.getParam("LoopMatchMaximumVarianceCoarse", param_d))
 		mMapper->SetParameters("LoopMatchMaximumVarianceCoarse", param_d);
-		
+
 	if(mapperNode.getParam("LoopMatchMinimumResponseCoarse", param_d))
 		mMapper->SetParameters("LoopMatchMinimumResponseCoarse", param_d);
-		
+
 	if(mapperNode.getParam("LoopMatchMinimumResponseFine", param_d))
 		mMapper->SetParameters("LoopMatchMinimumResponseFine", param_d);
-	
+
 	mMapper->Message += karto::delegate(this, &MultiMapper::onMessage);
-	
+
 	mLaser = NULL;
-	
+
 	// Initialize Variables
 	mMapToOdometry.setIdentity();
 	mOdometryOffset.setIdentity();
 	mNodesAdded = 0;
 	mMapChanged = true;
 	mLastMapUpdate = ros::WallTime(0);
-	
+
 	if(mRobotID == 1)
 	{
 
 		mState = ST_MAPPING;
 		ROS_INFO("Initialized robot 1, starting to map now.");
 		mSelfLocalizer = NULL;
-		
+
 		geometry_msgs::PoseStamped locResult1;
 		locResult1.header.stamp = ros::Time::now();
 		locResult1.header.frame_id = mMapFrame.c_str();
 		locResult1.pose.position.x = 0.0;
-		locResult1.pose.position.y = -0.0;
+		locResult1.pose.position.y = -1.0;
 		locResult1.pose.position.z = 0.0;
 		locResult1.pose.orientation = tf::createQuaternionMsgFromYaw(0);
 		mPosePublisher.publish(locResult1);
 	}
-		
+
 	else if(mRobotID == 2)
 	{
 		//for stage simulator
@@ -174,19 +174,19 @@ MultiMapper::MultiMapper()
 		static double y = 12.0;
 		static double orien =0.0;
 		*/
-		static double x = 1.0;
-		static double y = 3.0;
+		static double x = 0.0;
+		static double y = 0.0;
 		static double orien =0.0;
 		setRobotPose(x,y,orien);
 
 
 		ROS_INFO("Received initial pose (%.2f, %.2f, %.2f) on robot %d, now starting to map.",x,y,orien,mRobotID);
-	
+
 		mState = ST_MAPPING;
 		ROS_INFO("Inititialized robot 2, starting to map now.");
 		mSelfLocalizer = NULL;
 	}
-	
+
 	else
 	{
 		// I am not number one, so wait to receive a map from number one.
@@ -195,7 +195,7 @@ MultiMapper::MultiMapper()
 		mSelfLocalizer = new SelfLocalizer();
 	}
 
-		
+
 
 }
 
@@ -219,7 +219,7 @@ void MultiMapper::setRobotPose(double x, double y, double yaw)
 	std::cout<<"SetRotation: success"<<std::endl;
 	transform = transform.inverse();
 	std::cout<<"Inverse: success"<<std::endl;
-	
+
 	tf::Stamped<tf::Pose> pose_in, pose_out;
 	std::cout<<"pose_in / out: success"<<std::endl;
 	pose_in.setData(transform);
@@ -228,19 +228,19 @@ void MultiMapper::setRobotPose(double x, double y, double yaw)
 	std::cout<<"RobotFrame: success"<<std::endl;
 	pose_in.stamp_ = ros::Time(0);
 	std::cout<<"Time: success"<<std::endl;
-	
+
 	mTransformListener.transformPose(pose_in.frame_id_, pose_in, pose_out);
-	
+
 	std::cout<<"Transform Pose: success"<<std::endl;
-	
+
 	transform = pose_out;
 	std::cout<<"pose out: success"<<std::endl;
 	mOdometryOffset = transform.inverse();
 	std::cout<<"Transform inverse: success"<<std::endl;
 
 	mSelfLocalizer = NULL;
-	
-	
+
+
 	// Publish the new pose (to inform other nodes, that we are localized now)
 
 	geometry_msgs::PoseStamped locResult;
@@ -251,7 +251,7 @@ void MultiMapper::setRobotPose(double x, double y, double yaw)
 	locResult.pose.position.z = 0;
 	locResult.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
 	mPosePublisher.publish(locResult);
-	
+
 	// Publish via tf
 	mState = ST_MAPPING;
 	publishTransform();
@@ -300,7 +300,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 	{
 		return;
 	}
-	
+
 	if(!mLaser)
 	{
 		// Create a laser range finder device and copy in data from the first scan
@@ -310,7 +310,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 		// Add the laser to the mapper
 		try
 		{
-			mLaser = karto::LaserRangeFinder::CreateLaserRangeFinder(karto::LaserRangeFinder_Custom, name);		
+			mLaser = karto::LaserRangeFinder::CreateLaserRangeFinder(karto::LaserRangeFinder_Custom, name);
 			mLaser->SetMinimumRange(scan->range_min);
 			mLaser->SetMaximumRange(scan->range_max);
 			mLaser->SetMinimumAngle(scan->angle_min);
@@ -325,7 +325,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			return;
 		}
 	}
-	
+
 	if(mState == ST_LOCALIZING)
 	{
 		mSelfLocalizer->process(scan);
@@ -334,12 +334,12 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			// Localization finished, kill the localizer and start mapping
 			ROS_INFO("Localization finished on robot %d, now starting to map.", mRobotID);
 			tf::Transform p = mSelfLocalizer->getBestPose();
-			
+
 			setRobotPose(p.getOrigin().getX(), p.getOrigin().getY(), tf::getYaw(p.getRotation()));
 			std::cout<<p.getOrigin().getX()<<" "<< p.getOrigin().getY()<<" "<< tf::getYaw(p.getRotation())<<std::endl;
 
 		}
-	}else 
+	}else
 	if(mState == ST_MAPPING)
 	{
 		// get the odometry pose from tf
@@ -365,7 +365,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 		karto::LocalizedLaserScanPtr laserScan = createFromRosMessage(*scan, mLaser->GetIdentifier());
 		laserScan->SetOdometricPose(kartoPose);
 		laserScan->SetCorrectedPose(kartoPose);
-		
+
 		bool success;
 		try
 		{
@@ -376,7 +376,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			ROS_ERROR("%s", e.GetErrorMessage().ToCString());
 			success = false;
 		}
-		
+
 		if(success)
 		{
 			// Compute the map->odom transform
@@ -394,7 +394,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 				ROS_WARN("Transform from %s to %s failed! (%s)", mLaserFrame.c_str(), mOffsetFrame.c_str(), e.what());
 				ok = false;
 			}
-			if(ok) 
+			if(ok)
 			{
 				mMapToOdometry = tf::Transform(tf::Quaternion( map_in_odom.getRotation() ), tf::Point(map_in_odom.getOrigin() ) ).inverse();
 				tf::Vector3 v = mMapToOdometry.getOrigin();
@@ -413,7 +413,7 @@ void MultiMapper::receiveLaserScan(const sensor_msgs::LaserScan::ConstPtr& scan)
 			// Send the scan to the other robots via com-layer (DDS)
 			ROS_DEBUG("Robot %d: Sending scan (uniqueID: %d, Sensor: %s, stateID: %d)", mRobotID, laserScan->GetUniqueId(), laserScan->GetSensorIdentifier().ToString().ToCString(), laserScan->GetStateId());
 			sendLocalizedScan(scan, laserScan->GetOdometricPose());
-			
+
 			// Publish via extra topic
 			nav2d_msgs::RobotPose other;
 			other.header.stamp = ros::Time::now();
@@ -434,7 +434,7 @@ bool MultiMapper::getMap(nav_msgs::GetMap::Request  &req, nav_msgs::GetMap::Resp
 		ROS_INFO("Still waiting for map from robot 1.");
 		return false;
 	}
-	
+
 	if(sendMap())
 	{
 		res.map = mGridMap;
@@ -449,7 +449,7 @@ bool MultiMapper::getMap(nav_msgs::GetMap::Request  &req, nav_msgs::GetMap::Resp
 bool MultiMapper::sendMap()
 {
 	if(!updateMap()) return false;
-	
+
 	// Publish the map
 	mMapPublisher.publish(mGridMap);
 	mLastMapUpdate = ros::WallTime::now();
@@ -480,7 +480,7 @@ bool MultiMapper::sendMap()
 		marker.color.g = 1.0;
 		marker.color.b = 0.0;
 		marker.points.resize(vertices.Size());
-		
+
 		for(int i = 0; i < vertices.Size(); i++)
 		{
 			marker.points[i].x = vertices[i]->GetVertexObject()->GetCorrectedPose().GetX();
@@ -488,7 +488,7 @@ bool MultiMapper::sendMap()
 			marker.points[i].z = 0;
 		}
 		mVerticesPublisher.publish(marker);
-		
+
 		// Publish the edges
 		karto::MapperGraph::EdgeList edges = mMapper->GetGraph()->GetEdges();
 		marker.header.frame_id = mMapFrame;
@@ -501,7 +501,7 @@ bool MultiMapper::sendMap()
 		marker.color.g = 0.0;
 		marker.color.b = 0.0;
 		marker.points.resize(edges.Size() * 2);
-		
+
 		for(int i = 0; i < edges.Size(); i++)
 		{
 			marker.points[2*i].x = edges[i]->GetSource()->GetVertexObject()->GetCorrectedPose().GetX();
@@ -520,14 +520,14 @@ bool MultiMapper::sendMap()
 bool MultiMapper::updateMap()
 {
 	if(!mMapChanged) return true;
-	
+
 	const karto::LocalizedLaserScanList allScans = mMapper->GetAllProcessedScans();
 	karto::OccupancyGridPtr kartoGrid = karto::OccupancyGrid::CreateFromScans(allScans, mMapResolution);
 
 	if(!kartoGrid)
 	{
 		ROS_WARN("Failed to get occupancy map from Karto-Mapper.");
-		return false; 
+		return false;
 	}
 
 	// Translate to ROS format
@@ -535,9 +535,9 @@ bool MultiMapper::updateMap()
 	unsigned int height = kartoGrid->GetHeight();
 	karto::Vector2<kt_double> offset = kartoGrid->GetCoordinateConverter()->GetOffset();
 
-	if(	mGridMap.info.width != width || 
-		mGridMap.info.height != height || 
-		mGridMap.info.origin.position.x != offset.GetX() || 
+	if(	mGridMap.info.width != width ||
+		mGridMap.info.height != height ||
+		mGridMap.info.origin.position.x != offset.GetX() ||
 		mGridMap.info.origin.position.y != offset.GetY())
 	{
 		mGridMap.info.resolution = mMapResolution;
@@ -547,10 +547,10 @@ bool MultiMapper::updateMap()
 		mGridMap.info.height = height;
 		mGridMap.data.resize(mGridMap.info.width * mGridMap.info.height);
 	}
-	
+
 	for (unsigned int y = 0; y < height; y++)
 	{
-		for (unsigned int x = 0; x < width; x++) 
+		for (unsigned int x = 0; x < width; x++)
 		{
 			// Getting the value at position x,y
 			kt_int8u value = kartoGrid->GetValue(karto::Vector2<kt_int32s>(x, y));
@@ -584,19 +584,19 @@ void MultiMapper::receiveLocalizedScan(const nav2d_msgs::LocalizedScan::ConstPtr
 {
 	// Ignore my own scans
 	if(scan->robot_id == mRobotID) return;
-	
+
 	// Get the robot id
 	char robot[10];
 	sprintf(robot, "robot_%d", scan->robot_id);
-	
+
 	// Get the scan pose
 	karto::Pose2 scanPose(scan->x, scan->y, scan->yaw);
-	
+
 	// create localized laser scan
 	karto::LocalizedLaserScanPtr localizedScan = createFromRosMessage(scan->scan, robot);
 	localizedScan->SetOdometricPose(scanPose);
 	localizedScan->SetCorrectedPose(scanPose);
-	
+
 	// feed the localized scan to the Karto-Mapper
 	bool added = false;
 	try
@@ -618,7 +618,7 @@ void MultiMapper::receiveLocalizedScan(const nav2d_msgs::LocalizedScan::ConstPtr
 				laser->SetRangeThreshold(mRangeThreshold);
 				mMapper->Process(laser);
 				mOtherLasers.insert(std::pair<int,karto::LaserRangeFinderPtr>(scan->robot_id,laser));
-			
+
 				added = mMapper->Process(localizedScan);
 			}
 			catch(karto::Exception e2)
@@ -635,7 +635,7 @@ void MultiMapper::receiveLocalizedScan(const nav2d_msgs::LocalizedScan::ConstPtr
 		mNodesAdded++;
 		mMapChanged = true;
 		ROS_DEBUG("Robot %d: Received scan (uniqueID: %d, Sensor: %s, stateID: %d)", mRobotID, localizedScan->GetUniqueId(), localizedScan->GetSensorIdentifier().ToString().ToCString(), localizedScan->GetStateId());
-		
+
 		// Publish via extra topic
 		nav2d_msgs::RobotPose other;
 		other.header.stamp = ros::Time::now();
@@ -645,7 +645,7 @@ void MultiMapper::receiveLocalizedScan(const nav2d_msgs::LocalizedScan::ConstPtr
 		other.pose.y = localizedScan->GetCorrectedPose().GetY();
 		other.pose.theta = localizedScan->GetCorrectedPose().GetHeading();
 		mOtherRobotsPublisher.publish(other);
-		
+
 		// Send the map via topic
 		ros::WallDuration d = ros::WallTime::now() - mLastMapUpdate;
 		if(mMapUpdateRate > 0 && d.toSec() > mMapUpdateRate)
@@ -680,7 +680,7 @@ void MultiMapper::sendLocalizedScan(const sensor_msgs::LaserScan::ConstPtr& scan
 	rosScan.x = pose.GetX();
 	rosScan.y = pose.GetY();
 	rosScan.yaw = pose.GetHeading();
-	
+
 	rosScan.scan.angle_min = scan->angle_min;
 	rosScan.scan.angle_max = scan->angle_max;
 	rosScan.scan.range_min = scan->range_min;
@@ -688,7 +688,7 @@ void MultiMapper::sendLocalizedScan(const sensor_msgs::LaserScan::ConstPtr& scan
 	rosScan.scan.angle_increment = scan->angle_increment;
 	rosScan.scan.time_increment = scan->time_increment;
 	rosScan.scan.scan_time = scan->scan_time;
-	
+
 	unsigned int nReadings = scan->ranges.size();
 	rosScan.scan.ranges.resize(nReadings);
 	for(unsigned int i = 0; i < nReadings; i++)
@@ -730,4 +730,3 @@ void MultiMapper::publishTransform()
 		mTransformBroadcaster.sendTransform(tf::StampedTransform (mMapToOdometry, ros::Time::now() , mMapFrame, mOffsetFrame));
 	}
 }
-
