@@ -29,6 +29,13 @@ MultiMapper::MultiMapper()
 	mapperNode.param("publish_pose_graph", mPublishPoseGraph, true);
 	mapperNode.param("max_covariance", mMaxCovariance, 0.05);
 	mapperNode.param("min_map_size", mMinMapSize, 50);
+	mapperNode.param("instant_localization", mInstantLoc, true);
+	mapperNode.param("init_pose_x",mInitX,0.0);
+	mapperNode.param("init_pose_y",mInitY,0.0);
+	mapperNode.param("init_pose_z",mInitZ,0.0);
+
+
+
 
 	// Apply tf_prefix to all used frame-id's
 	mLaserFrame = mTransformListener.resolve(mLaserFrame);
@@ -159,14 +166,21 @@ MultiMapper::MultiMapper()
 		geometry_msgs::PoseStamped locResult1;
 		locResult1.header.stamp = ros::Time::now();
 		locResult1.header.frame_id = mMapFrame.c_str();
+		/*
 		locResult1.pose.position.x = 0.0;
 		locResult1.pose.position.y = -1.0;
 		locResult1.pose.position.z = 0.0;
+		*/
+
+		locResult1.pose.position.x = mInitX;
+		locResult1.pose.position.y = mInitY;
+		locResult1.pose.position.z = mInitZ;
+
 		locResult1.pose.orientation = tf::createQuaternionMsgFromYaw(0);
 		mPosePublisher.publish(locResult1);
 	}
 
-	else if(mRobotID == 2)
+	else if((mRobotID == 2) && mInstantLoc)
 	{
 		//for stage simulator
 		/*
@@ -177,8 +191,8 @@ MultiMapper::MultiMapper()
 		static double x = 0.0;
 		static double y = 0.0;
 		static double orien =0.0;
-		setRobotPose(x,y,orien);
-
+		//setRobotPose(x,y,orien);
+		setRobotPose(mInitX,mInitY,orien);
 
 		ROS_INFO("Received initial pose (%.2f, %.2f, %.2f) on robot %d, now starting to map.",x,y,orien,mRobotID);
 
