@@ -86,7 +86,7 @@ private:
 	bool mPublishPoseGraph;	    // Whether or not to publish the pose graph as marker-message.
 	int mNodesAdded;            // Number of nodes added to the pose graph.
 	int mMinMapSize;            // Minimum map size (# of nodes) needed for localization.
-	bool mInstantLoc; 			// Add a paramameter to initialize instant slam procigure
+	bool mInstantLoc; 			// Add a parameter to initialize instant slam procedure
 
 	ros::WallTime mLastMapUpdate;
 

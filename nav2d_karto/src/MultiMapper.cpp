@@ -166,12 +166,6 @@ MultiMapper::MultiMapper()
 		geometry_msgs::PoseStamped locResult1;
 		locResult1.header.stamp = ros::Time::now();
 		locResult1.header.frame_id = mMapFrame.c_str();
-		/*
-		locResult1.pose.position.x = 0.0;
-		locResult1.pose.position.y = -1.0;
-		locResult1.pose.position.z = 0.0;
-		*/
-
 		locResult1.pose.position.x = mInitX;
 		locResult1.pose.position.y = mInitY;
 		locResult1.pose.position.z = mInitZ;
@@ -182,14 +176,13 @@ MultiMapper::MultiMapper()
 
 	else if((mRobotID == 2) && mInstantLoc)
 	{
-		//for stage simulator
 		/*
-		static double x = -14.0;
-		static double y = 12.0;
-		static double orien =0.0;
+			for stage simulator
+
+			x = -14.0;
+			y = 12.0;
+			orien =0.0;
 		*/
-		static double x = 0.0;
-		static double y = 0.0;
 		static double orien =0.0;
 		//setRobotPose(x,y,orien);
 		setRobotPose(mInitX,mInitY,orien);
