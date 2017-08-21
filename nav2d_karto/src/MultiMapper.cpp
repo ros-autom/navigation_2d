@@ -187,7 +187,7 @@ MultiMapper::MultiMapper()
 		//setRobotPose(x,y,orien);
 		setRobotPose(mInitX,mInitY,orien);
 
-		ROS_INFO("Received initial pose (%.2f, %.2f, %.2f) on robot %d, now starting to map.",x,y,orien,mRobotID);
+		ROS_INFO("Received initial pose (%.2f, %.2f, %.2f) on robot %d, now starting to map.",mInitX,mInitY,orien,mRobotID);
 
 		mState = ST_MAPPING;
 		ROS_INFO("Inititialized robot 2, starting to map now.");
